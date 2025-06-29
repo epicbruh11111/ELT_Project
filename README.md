@@ -1,6 +1,6 @@
 ﻿# ELT_Project
 
-![Screenshot]([./Screenshot 2025-06-29 214413.png)
+![Description](Screenshot-2025-06-29-214413.png)
 
 ## ELT Project using pure SQL Postgres
 
