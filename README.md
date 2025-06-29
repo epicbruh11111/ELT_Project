@@ -1,6 +1,6 @@
 ﻿# ELT_Project
 
-![Screenshot]([./Screenshot-2025-06-29-214413.png](https://github.com/epicbruh11111/ELT_Project/blob/main/Screenshot%202025-06-29%20214413.png))
+![Screenshot]([./Screenshot 2025-06-29 214413.png)
 
 ## ELT Project using pure SQL Postgres
 
