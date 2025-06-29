@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  source_postgres:
+    image: postgres:15-alpine  # Lightweight PostgreSQL
+    ports:
+      - "5433:5432"  # Host:Container port mapping
+    networks:
+      - elt_network
+    environment:
+      - POSTGRES_DB=source_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=secret
+    volumes:
+      - ./source_db_init/init.sql:/docker-entrypoint-initdb.d/init.sql  # DB initialization
+    healthcheck:  # Ensures DB is ready before dependencies start
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  destination_postgres:
+    image: postgres:15-alpine
+    ports:
+      - "5434:5432"
+    networks:
+      - elt_network
+    environment:
+      - POSTGRES_DB=destination_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=secret
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  elt_script:
+    build:
+      context: ./elt  # Path to your Python script's Dockerfile
+      dockerfile: Dockerfile
+    command: ["python", "elt_script.py"]  # Entrypoint command
+    networks:
+      - elt_network
+    depends_on:  # Corrected service names
+      source_postgres:
+        condition: service_healthy  # Waits for healthy DB
+      destination_postgres:
+        condition: service_healthy
+    environment:  # Recommended: Pass DB credentials as env vars
+      - SOURCE_DB_URL=postgresql://postgres:secret@source_postgres:5432/source_db
+      - DEST_DB_URL=postgresql://postgres:secret@destination_postgres:5432/destination_db
+
+networks:
+  elt_network:
+    driver: bridge  # Isolated network for secure communication
